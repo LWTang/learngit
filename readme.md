@@ -1,2 +1,1 @@
-i am for origin repository
-hhhhh
+记录 git 笔记
