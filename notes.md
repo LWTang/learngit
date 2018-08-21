@@ -21,3 +21,8 @@
 3. 将远程和本地库关联起来：```git remote add origin git@github.com:LWTang/PyQt-learn.git```
 4. 将远程库pull到本地：```git pull origin master```
 5. 开始表演(⊙o⊙)…
+
+### 在仓库显示图片
+```js
+https://github.com/LWTang/项目名/raw/master/图片在仓库的路径
+```
