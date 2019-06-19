@@ -71,3 +71,55 @@ git reset HEAD test.txt
 ```
 git commit --amend
 ```
+
+### 多进程
+#### fork()系统调用
+fork()调用一次，返回两次，分别在子进程和父进程里返回，在子进程里返回0，在父进程里返回子进程的id。因为父进程要通过fork拿到子进程的id，而在子进程里可以通过getppid()拿到父进程的id
+```python
+import os
+
+print('Process (%s) start...' % os.getpid())
+# Only works on Unix/Linux/Mac:
+pid = os.fork()
+if pid == 0:
+    print('I am child process (%s) and my parent is %s.' % (os.getpid(), os.getppid()))
+else:
+    print('I (%s) just created a child process (%s).' % (os.getpid(), pid))
+```
+运行结果：
+```
+Process (876) start...
+I (876) just created a child process (877).
+I am child process (877) and my parent is 876.
+```
+
+### js(...)
+1. 展开语法：
+将数组或者对象展开
+```js
+//数组展开
+var arr1 = [0, 1, 2];
+var arr2 = [3, 4, 5];
+arr1 = [...arr2, ...arr1]; // arr1 现在为 [3, 4, 5, 0, 1, 2]
+
+//对象展开
+var obj1 = { foo: 'bar', x: 42 };
+var obj2 = { foo: 'baz', y: 13 };
+
+var clonedObj = { ...obj1 }; // 克隆后的对象: { foo: "bar", x: 42 }
+
+var mergedObj = { ...obj1, ...obj2 }; // 合并后的对象: { foo: "baz", x: 42, y: 13 }
+```
+
+2. 剩余参数
+将一个不定数量的参数表示为一个数组
+```js
+function multiply(multiplier, ...theArgs) {
+  return theArgs.map(function (element) {
+    return multiplier * element;
+  });
+}
+
+var arr = multiply(2, 1, 2, 3); 
+console.log(arr);  // [2, 4, 6]
+```
