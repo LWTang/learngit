@@ -93,6 +93,25 @@ I (876) just created a child process (877).
 I am child process (877) and my parent is 876.
 ```
 
+```python
+import os
+
+# Only works on Unix/Linux/Mac:
+pid = os.fork()
+print('Process (%s) start...' % os.getpid())
+if pid == 0:
+    print('I am child process (%s) and my parent is %s.' % (os.getpid(), os.getppid()))
+else:
+    print('I (%s) just created a child process (%s).' % (os.getpid(), pid))
+```
+运行结果：
+```
+Process (6382) start...
+I (6382) just created a child process (6383).
+Process (6383) start...
+I am child process (6383) and my parent is 6382.
+```
+
 ### js(...)
 1. 展开语法：
 将数组或者对象展开
