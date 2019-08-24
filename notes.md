@@ -205,20 +205,22 @@ HMdashboard
 
 运行流程：
 1.首先运行起来服务端代码(设置监听端口，连接上mongodb数据库，将管理员用户名和密码存到数据库，注册flask蓝图)；
-2.浏览器访问根路由，由flask控制的‘index路由’请求需要登录，这时跳到后端路由/login，然后返回一个前端模板文件index.html；
+2.浏览器访问根路由，由flask_login转到验证id的函数，第一次登录id是空的，所以跳到后端路由/login，然后返回一个前端模板
+  文件index.html；
 3.到了前端部分，前端根路由会根据一个权限的token决定是否渲染页面，第一次发过来的index.html中权限的token是为空的，所以
   前端路由跳到/user/login，输入用户名和密码之后，请求发送到后端；
-4.后端根据用户名和密码查询数据库，若找到，则返回success和一个url，前端根据success和url进行跳转；
+4.后端根据用户名和密码查询数据库，若找到，用login_user保存用户信息，包括一个id，然后返回success和一个url(根路由)，前
+  端根据success请求url，再次由flask_login验证id，这次由于有id，进入到index函数，返回index.html，这次包含token；
 5.HMdashboard的功能分为创建主机和创建用户，创建主机时，指定类型(docker，k8s)、名字和ip等参数，后端接收到请求之后把
-  host信息写到数据库表中，再对docker进行初始化(通过client = 6.APIClient(base_url=worker_api, version="auto", 
-  timeout=timeout))，初始化包括指定daemon ip地址，创建两个bridge类型的网络(solo,kafka)，因为创建的容器在fabric中
-  是以peer节点的形式存在，而且要保证他们之间的通信；
-7.创建用户是指创建操作userdashboard的用户，把用户名和密码存到数据库表里；
+  host信息写到数据库表中，再对docker进行初始化(通过client = APIClient(base_url=worker_api, version="auto", 
+  timeout=timeout))，初始化包括指定daemon ip地址，创建两个bridge(client.create_network)类型的网络(solo,kafka)，因为
+  创建的容器在fabric中是以peer节点的形式存在，而且要保证他们之间的通信(overlay类型的网络，保证容器在两个跨主机进行通信)；
+6.创建用户是指创建操作userdashboard的用户，把用户名和密码存到数据库表里；
 
-12.初始化组织的时候，首先要根据userdashboard发来的配置信息，每个容器都要创建一个docker compose file，里面包含容器的
+11.初始化组织的时候，首先要根据userdashboard发来的配置信息，每个容器都要创建一个docker compose file，里面包含容器的
   启动以及配置信息(镜像路径、端口号、fabric配置文件挂载在本机的路径、容器内的环境变量等等)；创建容器的时候用到多线程
-13.根据dockercompose file调用docker compose的python sdk把容器run起来(相当于docker-compose up)；
-14.最后把创建容器的用户和组织写到数据库表；
+12.根据dockercompose file调用docker compose的python sdk把容器run起来(相当于docker-compose up)；
+13.最后把创建容器的用户和组织写到数据库表；
 
 
 userdashboard
@@ -226,13 +228,13 @@ userdashboard
 前端：
 
 运行流程：
-8.首先通过egg-bin把服务端程序运行起来，浏览器中访问根路由，服务端返回一个index.tpl的模板文件；
-9.由于还没做身份认证，代表权限的token为空，前端路由渲染/user/login页面；
-10.填入用户名和密码，把它们发送到后端，这时用passport来做身份认证，具体的认证过程是，到数据库查询有没有跟这个用户
+7.首先通过egg-bin把服务端程序运行起来，浏览器中访问根路由，服务端返回一个index.tpl的模板文件；
+8.由于还没做身份认证，代表权限的token为空，前端路由渲染/user/login页面；
+9.填入用户名和密码，把它们发送到后端，这时用passport来做身份认证，具体的认证过程是，到数据库查询有没有跟这个用户
    名和密码相匹配的，认证成功后把浏览器路由重定向到根路由，同时把token发给前端；
-11.userdashboard的功能目前有初始化组织和创建fabric网络，组织的初始化是指创建fabric网络中的peer节点、ca节点和
+10.userdashboard的功能目前有初始化组织和创建fabric网络，组织的初始化是指创建fabric网络中的peer节点、ca节点和
    orderer节点等等，初始化的请求要发送到hmdashboard；
-13.创建fabric网络，首先读出数据库表中peer、oderer、org、ca节点的信息，然后设置fabric网络的相关配置文件的路径
+14.创建fabric网络，首先读出数据库表中peer、oderer、org、ca节点的信息，然后设置fabric网络的相关配置文件的路径
   (包括key-value store，通道配置文件等等)，最后根据这些配置信息通过fabric node sdk还原一个fabric client对象；
 
 借鉴了一些开源项目
