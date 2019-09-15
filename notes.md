@@ -240,11 +240,11 @@ HMdashboard
 
 运行流程：
 1.首先运行起来服务端代码(设置监听端口，连接上mongodb数据库，将管理员用户名和密码存到数据库，注册flask蓝图)；
-2.浏览器访问根路由，由flask_login转到验证id的函数，第一次登录id是空的，所以跳到后端路由/login，然后返回一个前端模板
+2.浏览器访问根路由，由flask_login转到验证id(cookie)的函数，第一次登录id(cookie)是空的，所以跳到后端路由/login，然后返回一个前端模板
   文件index.html；
 3.到了前端部分，前端根路由会根据一个权限的token决定是否渲染页面，第一次发过来的index.html中权限的token是为空的，所以
   前端路由跳到/user/login，输入用户名和密码之后，请求发送到后端；
-4.后端根据用户名和密码查询数据库，若找到，用login_user保存用户信息，包括一个id，然后返回success和一个url(根路由)，前
+4.后端根据用户名和密码查询数据库，若找到，用login_user生成一个cookie(id)，然后返回success和一个url(根路由)，前
   端根据success请求url，再次由flask_login验证id，这次由于有id，进入到index函数，返回index.html，这次包含token；
 5.HMdashboard的功能分为创建主机和创建用户，创建主机时，指定类型(docker，k8s)、名字和ip等参数，后端接收到请求之后把
   host信息写到数据库表中，再对docker进行初始化(通过client = APIClient(base_url=worker_api, version="auto", 
